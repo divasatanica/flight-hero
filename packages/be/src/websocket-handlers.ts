@@ -6,6 +6,13 @@ import type {
   SubscribeMessage,
 } from "@flight-hero/contract";
 
+/** Application-level heartbeat matching the browser client's text messages. */
+function replyToPing(ws: WebSocket, data: Buffer): boolean {
+  if (data.toString() !== "ping") return false;
+  if (ws.readyState === WebSocket.OPEN) ws.send("pong");
+  return true;
+}
+
 /**
  * Handle basic planes WebSocket connection
  * Broadcasts all planes at regular intervals
@@ -27,6 +34,11 @@ export function handleBasicPlanesConnection(
     }
   };
 
+  const onMessage = (data: Buffer) => {
+    replyToPing(ws, data);
+  };
+  ws.on("message", onMessage);
+
   // Send initial data immediately
   sendUpdate();
 
@@ -35,6 +47,7 @@ export function handleBasicPlanesConnection(
 
   // Cleanup function
   return () => {
+    ws.off("message", onMessage);
     if (intervalId) {
       clearInterval(intervalId);
     }
@@ -70,7 +83,9 @@ export function handlePlaneDetailsConnection(
   };
 
   // Handle incoming messages
-  ws.on("message", (data: Buffer) => {
+  const onMessage = (data: Buffer) => {
+    if (replyToPing(ws, data)) return;
+
     try {
       const message: SubscribeMessage = JSON.parse(data.toString());
 
@@ -109,7 +124,7 @@ export function handlePlaneDetailsConnection(
           }),
         );
       }
-    } catch (error) {
+    } catch {
       ws.send(
         JSON.stringify({
           type: "error",
@@ -117,10 +132,12 @@ export function handlePlaneDetailsConnection(
         }),
       );
     }
-  });
+  };
+  ws.on("message", onMessage);
 
   // Cleanup function
   return () => {
+    ws.off("message", onMessage);
     if (intervalId) {
       clearInterval(intervalId);
     }

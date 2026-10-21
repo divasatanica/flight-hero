@@ -209,6 +209,8 @@ export class Plane {
       longitude: this.longitude,
       altitude: this.altitude,
       color: this.color,
+      heading: this.heading,
+      model: this.model,
     };
   }
 

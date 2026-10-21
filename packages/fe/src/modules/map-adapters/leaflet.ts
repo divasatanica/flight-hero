@@ -1,9 +1,10 @@
-import Leaflet, { Marker } from "leaflet";
+import Leaflet, { Marker, Polyline } from "leaflet";
 import type { FeatureCollection } from "geojson";
 import type {
   AdapterInitializationOptions,
+  FlightClickEvent,
+  FlightClickHandler,
   FlightMapAdapter,
-  MapAdapter,
 } from "./base";
 import MapCountriesJson from "../../maps/ne_50m_admin_0_countries.json";
 import MapAirportsJson from "../../maps/ne_50m_airports.json";
@@ -11,40 +12,28 @@ import type { PlaneBasic } from "@flight-hero/contract";
 
 import PlaneDefault from "../../assets/plane-default.svg?raw";
 
-function createPlaneIcon(color: string, size = 64) {
-  const container = document.createElement("div");
-  // 这里只插入项目内可信的 SVG 文件
-  container.innerHTML = PlaneDefault;
-
-  const svg = container.querySelector("svg")!;
-  svg.style.width = "100%";
-  svg.style.height = "100%";
-  svg.style.display = "block";
-  svg.style.color = color; // SVG 的 currentColor 使用这个颜色
-
-  // 每个实例使用独立 ID，避免多个飞机的 mask 相互引用
-  const prefix = `plane-${crypto.randomUUID()}`;
-  const mask = svg.querySelector("mask")!;
-  const maskId = `${prefix}-mask`;
-
-  mask.id = maskId;
-  svg.querySelector("[mask]")!.setAttribute("mask", `url(#${maskId})`);
-
-  const title = svg.querySelector("title")!;
-  title.id = `${prefix}-title`;
-  svg.setAttribute("aria-labelledby", title.id);
-
-  return Leaflet.divIcon({
-    html: container,
-    className: "plane-marker",
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
-}
-
-export class LeafletAdapter implements MapAdapter, FlightMapAdapter {
+export class LeafletAdapter implements FlightMapAdapter {
   private map: Leaflet.Map | null = null;
-  private markers: Map<string, Marker> = new Map();
+  private flightMarkers: Map<string, Marker> = new Map();
+  private flightTrails: Map<string, Polyline> = new Map();
+  private flightClickHandlers = new Set<FlightClickHandler>();
+  private mapClickHandlers = new Set<() => void>();
+
+  onMapClick(handler: () => void): () => void {
+    this.mapClickHandlers.add(handler);
+
+    return () => {
+      this.mapClickHandlers.delete(handler);
+    };
+  }
+
+  onFlightClick(handler: FlightClickHandler): () => void {
+    this.flightClickHandlers.add(handler);
+
+    return () => {
+      this.flightClickHandlers.delete(handler);
+    };
+  }
 
   init(options: AdapterInitializationOptions): void {
     if (this.map != null) {
@@ -53,6 +42,11 @@ export class LeafletAdapter implements MapAdapter, FlightMapAdapter {
     const { selectorID } = options;
     // Set the center as per backend's mock coordinators range instructed
     this.map = Leaflet.map(selectorID).setView([50, -90], 3.5);
+    this.map.on("zoomend", this.updateMarkerSizes);
+    // Bind click event listener to map
+    this.map.addEventListener("click", () => {
+      this.emitMapClick();
+    });
     import("leaflet/dist/leaflet.css")
       .then(() => {
         console.log("Leaflet CSS loaded!");
@@ -69,40 +63,101 @@ export class LeafletAdapter implements MapAdapter, FlightMapAdapter {
       return;
     }
 
+    this.map.off("zoomend", this.updateMarkerSizes);
     this.map.remove();
+    this.map = null;
+    this.flightMarkers.clear();
+    this.flightTrails.clear();
   }
 
   updateAircraft(id: string, payload: PlaneBasic): void {
     this.assertMapInstance();
-    let marker = this.markers.get(id);
+    let marker = this.flightMarkers.get(id);
 
     if (marker == null) {
       marker = Leaflet.marker([payload.latitude, payload.longitude], {
-        icon: createPlaneIcon(payload.color),
+        icon: LeafletAdapter.createPlaneIcon(
+          payload.color,
+          payload.heading,
+          this.getMarkerSize(),
+        ),
+        alt: `Plane: ${id}`,
+        title: id,
       });
       marker.addTo(this.map!);
+      this.flightMarkers.set(id, marker);
+
+      marker.addEventListener("click", () => {
+        this.emitFlightClick({ flightId: id });
+      });
       return;
     }
 
     marker.setLatLng([payload.latitude, payload.longitude]);
+
+    const svg = marker.getElement()?.querySelector("svg");
+    if (svg) {
+      svg.style.transform = `rotate(${payload.heading}deg)`;
+    }
   }
 
   removeAircraft(id: string): void {
     this.assertMapInstance();
-    const marker = this.markers.get(id);
+    const marker = this.flightMarkers.get(id);
 
     if (marker == null) {
       return;
     }
 
     marker.remove();
+    this.flightMarkers.delete(id);
   }
 
-  addTrack(points: Array<[number, number]>): void {}
+  addTrack(key: string, points: Array<[number, number]>): void {
+    if (!this.flightTrails.has(key)) {
+      const selectedTrail = Leaflet.polyline([], {
+        color: "#38bdf8",
+        weight: 2,
+      });
 
-  showTrack(points: Array<[number, number]>): void {}
+      this.flightTrails.set(key, selectedTrail);
+    }
 
-  clearTrack(): void {}
+    const trail = this.flightTrails.get(key)!;
+
+    trail.setLatLngs(points);
+  }
+
+  // Currently support displaying of one track
+  showTrack(points: Array<[number, number]>): void {
+    this.addTrack("DEFAULT", points);
+  }
+
+  clearAllTrack(): void {
+    const keys = this.flightTrails.keys();
+
+    for (const key of keys) {
+      this.clearTrack(key);
+    }
+  }
+
+  clearTrack(key = "DEFAULT"): void {
+    if (!this.flightTrails.has(key)) {
+      return;
+    }
+
+    const trail = this.flightTrails.get(key)!;
+
+    trail.setLatLngs([]);
+  }
+
+  private emitMapClick(): void {
+    this.mapClickHandlers.forEach((handler) => handler());
+  }
+
+  private emitFlightClick(event: FlightClickEvent): void {
+    this.flightClickHandlers.forEach((handler) => handler(event));
+  }
 
   private assertMapInstance() {
     if (this.map == null) {
@@ -152,5 +207,56 @@ export class LeafletAdapter implements MapAdapter, FlightMapAdapter {
         if (name) layer.bindTooltip(String(name));
       },
     }).addTo(this.map!);
+  }
+
+  private getMarkerSize(): number {
+    const zoom = this.map!.getZoom();
+    return Math.max(64, Math.min(96, 64 * 1.2 ** (zoom - 5)));
+  }
+
+  private updateMarkerSizes = (): void => {
+    const size = this.getMarkerSize();
+
+    this.flightMarkers.forEach((marker) => {
+      const element = marker.getElement();
+      if (!element) return;
+
+      element.style.width = `${size}px`;
+      element.style.height = `${size}px`;
+      element.style.marginLeft = `${-size / 2}px`;
+      element.style.marginTop = `${-size / 2}px`;
+    });
+  };
+
+  static createPlaneIcon(color: string, heading = 0, size = 64) {
+    const container = document.createElement("div");
+    container.innerHTML = PlaneDefault;
+
+    const svg = container.querySelector("svg")!;
+    svg.style.width = "100%";
+    svg.style.height = "100%";
+    svg.style.display = "block";
+    svg.style.color = color;
+    svg.style.transformOrigin = "50% 50%";
+    svg.style.transform = `rotate(${heading}deg)`;
+
+    // Use unique ID to avoid multiple plane icons shares duplicate ids
+    const prefix = `plane-${crypto.randomUUID()}`;
+    const mask = svg.querySelector("mask")!;
+    const maskId = `${prefix}-mask`;
+
+    mask.id = maskId;
+    svg.querySelector("[mask]")!.setAttribute("mask", `url(#${maskId})`);
+
+    const title = svg.querySelector("title")!;
+    title.id = `${prefix}-title`;
+    svg.setAttribute("aria-labelledby", title.id);
+
+    return Leaflet.divIcon({
+      html: container,
+      className: "plane-marker",
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    });
   }
 }

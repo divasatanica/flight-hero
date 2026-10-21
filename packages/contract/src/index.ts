@@ -7,6 +7,8 @@ export type PlaneBasic = {
   longitude: number;
   altitude: number;
   color: string;
+  heading: number;
+  model: string;
 };
 
 /**
