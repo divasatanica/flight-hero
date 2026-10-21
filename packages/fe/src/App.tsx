@@ -1,8 +1,9 @@
+import { MainMap } from "./components/main-map";
+
 export default function App() {
   return (
     <main>
-      <h1>Flight Hero</h1>
-      <p>Flight radar frontend.</p>
+      <MainMap />
     </main>
   );
 }
