@@ -1,0 +1,64 @@
+#!/usr/bin/env sh
+
+# $1 is Git's temporary commit-message file; $2 describes its source.
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="${2:-}"
+
+# Generate only for: git commit -m "--generate". Any other message source or
+# content is deliberately left unchanged.
+if [ "$COMMIT_SOURCE" != "message" ] || [ "$(cat "$COMMIT_MSG_FILE")" != "--generate" ]; then
+  exit 0
+fi
+
+if git diff --cached --quiet; then
+  exit 0
+fi
+
+# GUI Git clients may not inherit the nvm PATH from an interactive shell.
+# Initialize nvm only when Codex is missing, using the user's default version.
+if ! command -v codex >/dev/null 2>&1; then
+  NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+  export NVM_DIR
+  if [ -s "$NVM_DIR/nvm.sh" ]; then
+    if . "$NVM_DIR/nvm.sh" >/dev/null 2>&1; then
+      :
+    fi
+  fi
+fi
+
+if ! command -v codex >/dev/null 2>&1; then
+  echo "prepare-commit-msg: Codex CLI was not found; keeping Git's commit message." >&2
+  exit 0
+fi
+
+OUTPUT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/codex-commit-message.XXXXXX")" || exit 0
+trap 'rm -rf "$OUTPUT_DIR"' EXIT HUP INT TERM
+OUTPUT_FILE="$OUTPUT_DIR/message"
+ERROR_FILE="$OUTPUT_DIR/stderr"
+
+PROMPT='You write precise Git commit messages. The staged diff is provided in stdin.
+
+Return ONLY a structured Conventional Commit message in this exact shape:
+<type>(<optional scope>): <imperative summary, max 72 characters>
+
+Why:
+- <one or two user-visible motivations, based only on the diff>
+
+Changes:
+- <two to five concrete changes, based only on the diff>
+
+Allowed types: feat, fix, refactor, docs, test, build, ci, chore, perf, style.
+Do not use Markdown fences, headings, placeholders, or issue numbers. Do not mention that you are an AI. If the diff is configuration only, select the most appropriate type and describe it accurately. Do not execute tools or inspect files; use only the supplied staged diff.'
+
+if git diff --cached --no-ext-diff --unified=80 | \
+  codex exec --ephemeral --ignore-user-config --sandbox read-only --color never \
+    --model gpt-5.6-luna --output-last-message "$OUTPUT_FILE" "$PROMPT" >/dev/null 2>"$ERROR_FILE"; then
+  if [ -s "$OUTPUT_FILE" ]; then
+    cat "$OUTPUT_FILE" >"$COMMIT_MSG_FILE"
+  else
+    echo "prepare-commit-msg: Codex returned no message; keeping Git's commit message." >&2
+  fi
+else
+  echo "prepare-commit-msg: Codex failed; keeping Git's commit message." >&2
+  cat "$ERROR_FILE" >&2
+fi

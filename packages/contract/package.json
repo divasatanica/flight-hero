@@ -1,0 +1,17 @@
+{
+  "name": "@flight-hero/contract",
+  "version": "1.0.0",
+  "private": true,
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
