@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
 import "../styles/main-map.css";
-import { LeafletAdapter } from "../modules/map-adapters/leaflet";
 import type { MapAdapter } from "../modules/map-adapters/base";
+import { getMapAdaptar } from "../modules/map-adapters";
 
 export function MainMap() {
   const mapRef = useRef<MapAdapter | null>(null);
 
   useEffect(() => {
-    mapRef.current = new LeafletAdapter();
+    mapRef.current = getMapAdaptar();
     mapRef.current.init({
       type: "leaflet",
       selectorID: "map",
