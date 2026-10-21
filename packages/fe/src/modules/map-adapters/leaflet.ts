@@ -11,6 +11,25 @@ import MapAirportsJson from "../../maps/ne_50m_airports.json";
 import type { PlaneBasic } from "@flight-hero/contract";
 
 import PlaneDefault from "../../assets/plane-default.svg?raw";
+import AirbusA320 from "../../assets/airbus-a320.svg?raw";
+import AirbusA350 from "../../assets/airbus-a350.svg?raw";
+import AirbusA380 from "../../assets/airbus-a380.svg?raw";
+import Boeing737 from "../../assets/boeing-737.svg?raw";
+import Boeing777 from "../../assets/boeing-777.svg?raw";
+import Boeing787 from "../../assets/boeing-787.svg?raw";
+import EmbraerE190 from "../../assets/embraer-e190.svg?raw";
+import BombardierCRJ from "../../assets/bombardier-crj.svg?raw";
+
+const planeIcons: Readonly<Partial<Record<string, string>>> = {
+  "Airbus A320": AirbusA320,
+  "Airbus A350": AirbusA350,
+  "Airbus A380": AirbusA380,
+  "Boeing 737": Boeing737,
+  "Boeing 777": Boeing777,
+  "Boeing 787": Boeing787,
+  "Embraer E190": EmbraerE190,
+  "Bombardier CRJ": BombardierCRJ,
+};
 
 export class LeafletAdapter implements FlightMapAdapter {
   private map: Leaflet.Map | null = null;
@@ -56,6 +75,12 @@ export class LeafletAdapter implements FlightMapAdapter {
       });
 
     this.loadMap();
+
+    const dimmerPane = this.map.createPane("basemapDimmer");
+    dimmerPane.classList.add("flight-basemap-dimmer");
+    dimmerPane.setAttribute("aria-hidden", "true");
+    this.map.on("move zoom resize viewreset", this.updateDimmerBounds);
+    this.updateDimmerBounds();
   }
 
   destroy() {
@@ -64,6 +89,7 @@ export class LeafletAdapter implements FlightMapAdapter {
     }
 
     this.map.off("zoomend", this.updateMarkerSizes);
+    this.map.off("move zoom resize viewreset", this.updateDimmerBounds);
     this.map.remove();
     this.map = null;
     this.flightMarkers.clear();
@@ -78,6 +104,7 @@ export class LeafletAdapter implements FlightMapAdapter {
       marker = Leaflet.marker([payload.latitude, payload.longitude], {
         icon: LeafletAdapter.createPlaneIcon(
           payload.color,
+          payload.model,
           payload.heading,
           this.getMarkerSize(),
         ),
@@ -121,6 +148,7 @@ export class LeafletAdapter implements FlightMapAdapter {
       });
 
       this.flightTrails.set(key, selectedTrail);
+      selectedTrail.addTo(this.map!);
     }
 
     const trail = this.flightTrails.get(key)!;
@@ -168,6 +196,10 @@ export class LeafletAdapter implements FlightMapAdapter {
   private loadMap(): void {
     this.assertMapInstance();
 
+    const basemapPane = this.map!.createPane("basemap");
+    basemapPane.classList.add("flight-basemap-pane");
+    basemapPane.style.zIndex = "300";
+
     const colors = [
       "#cbd5e1",
       "#bfdbfe",
@@ -180,6 +212,7 @@ export class LeafletAdapter implements FlightMapAdapter {
 
     // Fill color into country blocks
     Leaflet.geoJSON(MapCountriesJson as FeatureCollection, {
+      pane: "basemap",
       style: (feature) => {
         const index = Number(feature?.properties?.MAPCOLOR7) - 1;
 
@@ -193,8 +226,10 @@ export class LeafletAdapter implements FlightMapAdapter {
     }).addTo(this.map!);
 
     Leaflet.geoJSON(MapAirportsJson as FeatureCollection, {
+      pane: "basemap",
       pointToLayer: (_feature, latlng) =>
         Leaflet.circleMarker(latlng, {
+          pane: "basemap",
           radius: 4,
           color: "#ffffff",
           weight: 1,
@@ -208,6 +243,19 @@ export class LeafletAdapter implements FlightMapAdapter {
       },
     }).addTo(this.map!);
   }
+
+  private updateDimmerBounds = (): void => {
+    if (!this.map) return;
+
+    const pane = this.map.getPane("basemapDimmer");
+    if (!pane) return;
+
+    const size = this.map.getSize();
+    const topLeft = this.map.containerPointToLayerPoint([0, 0]);
+    Leaflet.DomUtil.setPosition(pane, topLeft);
+    pane.style.width = `${size.x}px`;
+    pane.style.height = `${size.y}px`;
+  };
 
   private getMarkerSize(): number {
     const zoom = this.map!.getZoom();
@@ -228,9 +276,9 @@ export class LeafletAdapter implements FlightMapAdapter {
     });
   };
 
-  static createPlaneIcon(color: string, heading = 0, size = 64) {
+  static createPlaneIcon(color: string, model: string, heading = 0, size = 64) {
     const container = document.createElement("div");
-    container.innerHTML = PlaneDefault;
+    container.innerHTML = planeIcons[model] ?? PlaneDefault;
 
     const svg = container.querySelector("svg")!;
     svg.style.width = "100%";

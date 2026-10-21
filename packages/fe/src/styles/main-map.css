@@ -1,4 +1,12 @@
 #map {
+  --map-dimmer-opacity: 0.2;
   width: 100vw;
   height: 100vh;
+}
+
+/* Above the basemap (300), below trails (400) and aircraft (600). */
+#map .flight-basemap-dimmer {
+  z-index: 350;
+  background: rgb(0 0 0 / var(--map-dimmer-opacity));
+  pointer-events: none;
 }

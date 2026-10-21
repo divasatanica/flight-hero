@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="-10 -10 164 164" role="img" aria-labelledby="airbus-a380-title">
+  <title id="airbus-a380-title">Airbus A380 — top view, nose north</title>
+  <defs>
+    <mask id="airbus-a380-shape" maskUnits="userSpaceOnUse" x="0" y="0" width="144" height="144" style="mask-type:luminance">
+      <g transform="translate(10.8 0) scale(.85)" stroke="white" stroke-width="1.15" stroke-linejoin="round">
+        <path fill="white" d="M56 53 L8 83 Q4 84 4 90 L13 94 L57 100 Z" stroke="white" />
+        <path d="M50 75 L15 90 M50 81 L20 93" fill="none" stroke="black" stroke-width=".65" />
+        <path d="M38 69 Q43 64 48 69 L47 88 Q43 92 39 88 Z" fill="white" stroke="white" />
+        <ellipse cx="43" cy="70" rx="4" ry="2.5" fill="black" stroke="none" stroke-width="1" />
+        <path d="M18 80 Q23 75 28 80 L27 99 Q23 103 19 99 Z" fill="white" stroke="white" />
+        <ellipse cx="23" cy="81" rx="4" ry="2.5" fill="black" stroke="none" stroke-width="1" />
+        <path d="M69 97 L47 118 L47 123 L72 118 Z" fill="white" stroke="white" />
+        <path fill="white" d="M88 53 L136 83 Q140 84 140 90 L131 94 L87 100 Z" stroke="white" />
+        <path d="M94 75 L129 90 M94 81 L124 93" fill="none" stroke="black" stroke-width=".65" />
+        <path d="M96 69 Q101 64 106 69 L105 88 Q101 92 97 88 Z" fill="white" stroke="white" />
+        <ellipse cx="101" cy="70" rx="4" ry="2.5" fill="black" stroke="none" stroke-width="1" />
+        <path d="M116 80 Q121 75 126 80 L125 99 Q121 103 117 99 Z" fill="white" stroke="white" />
+        <ellipse cx="121" cy="81" rx="4" ry="2.5" fill="black" stroke="none" stroke-width="1" />
+        <path d="M75 97 L97 118 L97 123 L72 118 Z" fill="white" stroke="white" />
+        <path d="M72 9 C55 15 55 27 55 41 L55 91 Q57 113 72 125 Q87 113 89 91 L89 41 C89 27 89 15 72 9 Z" fill="white" stroke="white" />
+        <path d="M58 27 Q72 19 86 27 L87 32 Q72 27 57 32 Z" fill="black" stroke="none" stroke-width=".7" />
+        <path d="M72 25 V30" stroke="white" stroke-width="1" />
+        <rect x="56.3" y="39" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="56.3" y="44" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="56.3" y="49" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="56.3" y="54" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="56.3" y="59" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="56.3" y="64" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="56.3" y="69" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="56.3" y="74" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="56.3" y="79" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="56.3" y="84" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="56.3" y="89" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="86.3" y="39" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="86.3" y="44" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="86.3" y="49" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="86.3" y="54" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="86.3" y="59" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="86.3" y="64" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="86.3" y="69" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="86.3" y="74" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="86.3" y="79" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="86.3" y="84" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="86.3" y="89" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <path d="M72 88 Q68 111 72 125 Q76 111 72 88Z" fill="white" stroke="white" />
+        <rect x="60" y="36" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="60" y="41" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="60" y="46" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="60" y="51" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="60" y="56" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="60" y="61" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="60" y="66" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="60" y="71" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="60" y="76" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="60" y="81" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="60" y="86" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="82" y="36" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="82" y="41" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="82" y="46" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="82" y="51" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="82" y="56" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="82" y="61" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="82" y="66" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="82" y="71" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="82" y="76" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="82" y="81" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <rect x="82" y="86" width="2" height="2.5" rx=".6" fill="black" stroke="none" />
+        <path d="M72 35 V87" stroke="white" stroke-width="3" />
+      </g>
+      <g aria-label="A380" stroke="white">
+        <rect x="31.95" y="114" width="80.10" height="29" rx="7" fill="white" stroke="none" stroke-width="2" />
+        <path d="M43.65 119.00h2.7v2.7h-2.7z M46.35 119.00h2.7v2.7h-2.7z M49.05 119.00h2.7v2.7h-2.7z M40.95 121.70h2.7v2.7h-2.7z M51.75 121.70h2.7v2.7h-2.7z M40.95 124.40h2.7v2.7h-2.7z M51.75 124.40h2.7v2.7h-2.7z M40.95 127.10h2.7v2.7h-2.7z M43.65 127.10h2.7v2.7h-2.7z M46.35 127.10h2.7v2.7h-2.7z M49.05 127.10h2.7v2.7h-2.7z M51.75 127.10h2.7v2.7h-2.7z M40.95 129.80h2.7v2.7h-2.7z M51.75 129.80h2.7v2.7h-2.7z M40.95 132.50h2.7v2.7h-2.7z M51.75 132.50h2.7v2.7h-2.7z M40.95 135.20h2.7v2.7h-2.7z M51.75 135.20h2.7v2.7h-2.7z M57.15 119.00h2.7v2.7h-2.7z M59.85 119.00h2.7v2.7h-2.7z M62.55 119.00h2.7v2.7h-2.7z M65.25 119.00h2.7v2.7h-2.7z M67.95 121.70h2.7v2.7h-2.7z M67.95 124.40h2.7v2.7h-2.7z M59.85 127.10h2.7v2.7h-2.7z M62.55 127.10h2.7v2.7h-2.7z M65.25 127.10h2.7v2.7h-2.7z M67.95 129.80h2.7v2.7h-2.7z M67.95 132.50h2.7v2.7h-2.7z M57.15 135.20h2.7v2.7h-2.7z M59.85 135.20h2.7v2.7h-2.7z M62.55 135.20h2.7v2.7h-2.7z M65.25 135.20h2.7v2.7h-2.7z M76.05 119.00h2.7v2.7h-2.7z M78.75 119.00h2.7v2.7h-2.7z M81.45 119.00h2.7v2.7h-2.7z M73.35 121.70h2.7v2.7h-2.7z M84.15 121.70h2.7v2.7h-2.7z M73.35 124.40h2.7v2.7h-2.7z M84.15 124.40h2.7v2.7h-2.7z M76.05 127.10h2.7v2.7h-2.7z M78.75 127.10h2.7v2.7h-2.7z M81.45 127.10h2.7v2.7h-2.7z M73.35 129.80h2.7v2.7h-2.7z M84.15 129.80h2.7v2.7h-2.7z M73.35 132.50h2.7v2.7h-2.7z M84.15 132.50h2.7v2.7h-2.7z M76.05 135.20h2.7v2.7h-2.7z M78.75 135.20h2.7v2.7h-2.7z M81.45 135.20h2.7v2.7h-2.7z M92.25 119.00h2.7v2.7h-2.7z M94.95 119.00h2.7v2.7h-2.7z M97.65 119.00h2.7v2.7h-2.7z M89.55 121.70h2.7v2.7h-2.7z M100.35 121.70h2.7v2.7h-2.7z M89.55 124.40h2.7v2.7h-2.7z M97.65 124.40h2.7v2.7h-2.7z M100.35 124.40h2.7v2.7h-2.7z M89.55 127.10h2.7v2.7h-2.7z M94.95 127.10h2.7v2.7h-2.7z M100.35 127.10h2.7v2.7h-2.7z M89.55 129.80h2.7v2.7h-2.7z M92.25 129.80h2.7v2.7h-2.7z M100.35 129.80h2.7v2.7h-2.7z M89.55 132.50h2.7v2.7h-2.7z M100.35 132.50h2.7v2.7h-2.7z M92.25 135.20h2.7v2.7h-2.7z M94.95 135.20h2.7v2.7h-2.7z M97.65 135.20h2.7v2.7h-2.7z" fill="black" stroke="none" />
+      </g>
+    </mask>
+  </defs>
+  <g style="filter: drop-shadow(1.5px 3px 2px rgba(15, 23, 42, 0.4))">
+    <rect width="144" height="144" fill="currentColor" mask="url(#airbus-a380-shape)" />
+  </g>
+</svg>

@@ -25,6 +25,7 @@ export function MainMap() {
       store.clearSelectedFlightId();
     });
     mapRef.current.onFlightClick(({ flightId }) => {
+      console.log("✈️ Selected:", flightId);
       store.updateSelectedFlightId(flightId);
     });
 

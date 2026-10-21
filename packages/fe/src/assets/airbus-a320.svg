@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="-10 -10 164 164" role="img" aria-labelledby="airbus-a320-title">
+  <title id="airbus-a320-title">Airbus A320 — top view, nose north</title>
+  <defs>
+    <mask id="airbus-a320-shape" maskUnits="userSpaceOnUse" x="0" y="0" width="144" height="144" style="mask-type:luminance">
+      <g transform="translate(10.8 0) scale(.85)" stroke="white" stroke-width="1.15" stroke-linejoin="round">
+        <path fill="white" d="M61 53 L19 83 Q15 84 15 90 L24 94 L62 92 Z" stroke="white" />
+        <path d="M55 75 L26 90 M55 81 L31 93" fill="none" stroke="black" stroke-width=".65" />
+        <path d="M19 88 L15 79 L15 91 Z" fill="white" stroke="white" />
+        <path d="M39 69 Q45 64 51 69 L50 88 Q45 92 40 88 Z" fill="white" stroke="white" />
+        <ellipse cx="45" cy="70" rx="5" ry="2.5" fill="black" stroke="none" stroke-width="1" />
+        <path d="M69 86 L47 107 L47 112 L72 107 Z" fill="white" stroke="white" />
+        <path fill="white" d="M83 53 L125 83 Q129 84 129 90 L120 94 L82 92 Z" stroke="white" />
+        <path d="M89 75 L118 90 M89 81 L113 93" fill="none" stroke="black" stroke-width=".65" />
+        <path d="M125 88 L129 79 L129 91 Z" fill="white" stroke="white" />
+        <path d="M93 69 Q99 64 105 69 L104 88 Q99 92 94 88 Z" fill="white" stroke="white" />
+        <ellipse cx="99" cy="70" rx="5" ry="2.5" fill="black" stroke="none" stroke-width="1" />
+        <path d="M75 86 L97 107 L97 112 L72 107 Z" fill="white" stroke="white" />
+        <path d="M72 9 C60 15 60 27 60 41 L60 80 Q62 102 72 114 Q82 102 84 80 L84 41 C84 27 84 15 72 9 Z" fill="white" stroke="white" />
+        <path d="M63 27 Q72 19 81 27 L82 32 Q72 27 62 32 Z" fill="black" stroke="none" stroke-width=".7" />
+        <path d="M72 25 V30" stroke="white" stroke-width="1" />
+        <rect x="61.3" y="39" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="61.3" y="44" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="61.3" y="49" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="61.3" y="54" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="61.3" y="59" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="61.3" y="64" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="61.3" y="69" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="61.3" y="74" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="81.3" y="39" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="81.3" y="44" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="81.3" y="49" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="81.3" y="54" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="81.3" y="59" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="81.3" y="64" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="81.3" y="69" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <rect x="81.3" y="74" width="1.4" height="2" rx=".5" fill="black" stroke="none" />
+        <path d="M72 77 Q68 100 72 114 Q76 100 72 77Z" fill="white" stroke="white" />
+        <path d="M72 35 V76" stroke="white" stroke-width="3" />
+      </g>
+      <g aria-label="A320" stroke="white">
+        <rect x="31.95" y="114" width="80.10" height="29" rx="7" fill="white" stroke="none" stroke-width="2" />
+        <path d="M43.65 119.00h2.7v2.7h-2.7z M46.35 119.00h2.7v2.7h-2.7z M49.05 119.00h2.7v2.7h-2.7z M40.95 121.70h2.7v2.7h-2.7z M51.75 121.70h2.7v2.7h-2.7z M40.95 124.40h2.7v2.7h-2.7z M51.75 124.40h2.7v2.7h-2.7z M40.95 127.10h2.7v2.7h-2.7z M43.65 127.10h2.7v2.7h-2.7z M46.35 127.10h2.7v2.7h-2.7z M49.05 127.10h2.7v2.7h-2.7z M51.75 127.10h2.7v2.7h-2.7z M40.95 129.80h2.7v2.7h-2.7z M51.75 129.80h2.7v2.7h-2.7z M40.95 132.50h2.7v2.7h-2.7z M51.75 132.50h2.7v2.7h-2.7z M40.95 135.20h2.7v2.7h-2.7z M51.75 135.20h2.7v2.7h-2.7z M57.15 119.00h2.7v2.7h-2.7z M59.85 119.00h2.7v2.7h-2.7z M62.55 119.00h2.7v2.7h-2.7z M65.25 119.00h2.7v2.7h-2.7z M67.95 121.70h2.7v2.7h-2.7z M67.95 124.40h2.7v2.7h-2.7z M59.85 127.10h2.7v2.7h-2.7z M62.55 127.10h2.7v2.7h-2.7z M65.25 127.10h2.7v2.7h-2.7z M67.95 129.80h2.7v2.7h-2.7z M67.95 132.50h2.7v2.7h-2.7z M57.15 135.20h2.7v2.7h-2.7z M59.85 135.20h2.7v2.7h-2.7z M62.55 135.20h2.7v2.7h-2.7z M65.25 135.20h2.7v2.7h-2.7z M76.05 119.00h2.7v2.7h-2.7z M78.75 119.00h2.7v2.7h-2.7z M81.45 119.00h2.7v2.7h-2.7z M73.35 121.70h2.7v2.7h-2.7z M84.15 121.70h2.7v2.7h-2.7z M84.15 124.40h2.7v2.7h-2.7z M81.45 127.10h2.7v2.7h-2.7z M78.75 129.80h2.7v2.7h-2.7z M76.05 132.50h2.7v2.7h-2.7z M73.35 135.20h2.7v2.7h-2.7z M76.05 135.20h2.7v2.7h-2.7z M78.75 135.20h2.7v2.7h-2.7z M81.45 135.20h2.7v2.7h-2.7z M84.15 135.20h2.7v2.7h-2.7z M92.25 119.00h2.7v2.7h-2.7z M94.95 119.00h2.7v2.7h-2.7z M97.65 119.00h2.7v2.7h-2.7z M89.55 121.70h2.7v2.7h-2.7z M100.35 121.70h2.7v2.7h-2.7z M89.55 124.40h2.7v2.7h-2.7z M97.65 124.40h2.7v2.7h-2.7z M100.35 124.40h2.7v2.7h-2.7z M89.55 127.10h2.7v2.7h-2.7z M94.95 127.10h2.7v2.7h-2.7z M100.35 127.10h2.7v2.7h-2.7z M89.55 129.80h2.7v2.7h-2.7z M92.25 129.80h2.7v2.7h-2.7z M100.35 129.80h2.7v2.7h-2.7z M89.55 132.50h2.7v2.7h-2.7z M100.35 132.50h2.7v2.7h-2.7z M92.25 135.20h2.7v2.7h-2.7z M94.95 135.20h2.7v2.7h-2.7z M97.65 135.20h2.7v2.7h-2.7z" fill="black" stroke="none" />
+      </g>
+    </mask>
+  </defs>
+  <g style="filter: drop-shadow(1.5px 3px 2px rgba(15, 23, 42, 0.4))">
+    <rect width="144" height="144" fill="currentColor" mask="url(#airbus-a320-shape)" />
+  </g>
+</svg>
