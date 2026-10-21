@@ -1,7 +1,8 @@
 import Leaflet from "leaflet";
 import type { FeatureCollection } from "geojson";
 import type { AdapterInitializationOptions, MapAdapter } from "./base";
-import MapJson from "../../maps/ne_50m_admin_0_countries.json";
+import MapCountriesJson from "../../maps/ne_50m_admin_0_countries.json";
+import MapAirportsJson from "../../maps/ne_50m_airports.json";
 
 export class LeafletAdapter implements MapAdapter {
   map: Leaflet.Map | null = null;
@@ -48,7 +49,7 @@ export class LeafletAdapter implements MapAdapter {
     ];
 
     // Fill color into country blocks
-    Leaflet.geoJSON(MapJson as FeatureCollection, {
+    Leaflet.geoJSON(MapCountriesJson as FeatureCollection, {
       style: (feature) => {
         const index = Number(feature?.properties?.MAPCOLOR7) - 1;
 
@@ -58,6 +59,22 @@ export class LeafletAdapter implements MapAdapter {
           color: "#64748b",
           weight: 1,
         };
+      },
+    }).addTo(this.map!);
+
+    Leaflet.geoJSON(MapAirportsJson as FeatureCollection, {
+      pointToLayer: (_feature, latlng) =>
+        Leaflet.circleMarker(latlng, {
+          radius: 4,
+          color: "#ffffff",
+          weight: 1,
+          fillColor: "#f59e0b",
+          fillOpacity: 1,
+        }),
+
+      onEachFeature: (feature, layer) => {
+        const name = feature.properties?.name;
+        if (name) layer.bindTooltip(String(name));
       },
     }).addTo(this.map!);
   }
