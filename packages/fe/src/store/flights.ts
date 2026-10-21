@@ -125,6 +125,7 @@ export function connnectFlightBasicToAircraftMap(
   return store.subscribe(
     (store) => store.positions,
     (currPositions) => {
+      console.log("updatingPositions");
       Object.keys(currPositions).forEach((flightId) => {
         const { timeline, ...restBasic } = currPositions[flightId];
         const newestPosition = timeline[timeline.length - 1];

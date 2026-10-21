@@ -1,8 +1,18 @@
+import type { EventEmitter } from "./event-emitter";
 import type { PlaneBasic } from "@flight-hero/contract";
 
 export type FlightClickEvent = { flightId: string };
-export type FlightClickHandler = (event: FlightClickEvent) => void;
-export interface FlightMapAdapter {
+/** Add new event names and argument tuples here. */
+export type FlightMapEvents = {
+  flightClick: [event: FlightClickEvent];
+  mapClick: [];
+  mapLoaded: [];
+};
+
+export interface FlightMapAdapter extends Pick<
+  EventEmitter<FlightMapEvents>,
+  "on" | "off" | "once"
+> {
   init(options: AdapterInitializationOptions): void;
   destroy(): void;
   updateAircraft(id: string, payload: PlaneBasic): void;
@@ -11,8 +21,6 @@ export interface FlightMapAdapter {
   addTrack(key: string, points: Array<[number, number]>): void;
   clearTrack(key?: string): void;
   clearAllTrack(): void;
-  onFlightClick(handler: FlightClickHandler): () => void;
-  onMapClick(handler: () => void): () => void;
 }
 
 export type LeafletInitializationOptions = {

@@ -1,44 +1,25 @@
-import { useEffect, useRef } from "react";
+import { lazy, useEffect, useRef, useState } from "react";
 import "../styles/main-map.css";
 import type { FlightMapAdapter } from "../modules/map-adapters/base";
 import { mapAdapaterFactory } from "../modules/map-adapters";
 import { FlightSocket } from "../modules/websocket/flights";
 import { CONFIGS } from "../modules/configs";
-import { PlaneDetailDrawer } from "./plane-detail-drawer";
 import {
   connectFlightIdToMap,
   connnectFlightBasicToAircraftMap,
   useFlightStore,
 } from "../store/flights";
 
+const LazyPlaneDetailDrawer = lazy(async () => ({
+  default: (await import("./plane-detail-drawer")).PlaneDetailDrawer,
+}));
+
 export function MainMap() {
   const mapRef = useRef<FlightMapAdapter | null>(null);
   const flightBasicSocketRef = useRef<FlightSocket | null>(null);
   const store = useFlightStore();
   const selectedFlightId = store.selectedFlightId;
-
-  useEffect(() => {
-    mapRef.current = mapAdapaterFactory();
-    mapRef.current.init({
-      type: "leaflet",
-      selectorID: "map",
-    });
-    mapRef.current.onMapClick(() => {
-      store.clearSelectedFlightId();
-    });
-    mapRef.current.onFlightClick(({ flightId }) => {
-      console.log("✈️ Selected:", flightId);
-      store.updateSelectedFlightId(flightId);
-    });
-
-    return () => {
-      if (mapRef.current == null) {
-        return;
-      }
-      mapRef.current.destroy();
-      mapRef.current = null;
-    };
-  }, []);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     flightBasicSocketRef.current = new FlightSocket(
@@ -59,8 +40,35 @@ export function MainMap() {
         },
       },
     );
-    flightBasicSocketRef.current.init();
+    mapRef.current = mapAdapaterFactory();
+    mapRef.current.on("mapClick", () => {
+      store.clearSelectedFlightId();
+    });
+    mapRef.current.on("flightClick", ({ flightId }) => {
+      console.log("✈️ Selected:", flightId);
+      store.updateSelectedFlightId(flightId);
+    });
+    mapRef.current.on("mapLoaded", () => {
+      console.log("mapLoaded");
+      flightBasicSocketRef.current!.init();
+      setMapLoaded(true);
+    });
 
+    mapRef.current.init({
+      type: "leaflet",
+      selectorID: "map",
+    });
+
+    return () => {
+      if (mapRef.current == null) {
+        return;
+      }
+      mapRef.current.destroy();
+      mapRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
     const unsubscribeFlightBasic = connnectFlightBasicToAircraftMap(
       useFlightStore,
       mapRef.current!,
@@ -79,9 +87,11 @@ export function MainMap() {
 
   return (
     <div>
-      <div id="map"></div>
+      <div id="map">
+        {mapLoaded ? null : <span>Loading map resources...</span>}
+      </div>
       {selectedFlightId !== "" && (
-        <PlaneDetailDrawer
+        <LazyPlaneDetailDrawer
           key={selectedFlightId}
           selectedFlightId={selectedFlightId}
           onClose={store.clearSelectedFlightId}

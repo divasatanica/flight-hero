@@ -53,3 +53,31 @@ version before looking for Codex again. If generation fails, the hook reports
 the error and keeps the original message.
 
 Run the hook regression tests with `node --test prepare-commit-msg.test.mjs`.
+
+### Map adapter events
+
+Subscribe before `init()` to receive `map-loaded`, which fires synchronously
+once the map, layers, and panes have been initialized (it does not wait for the
+asynchronously imported Leaflet CSS).
+
+```ts
+adapter.once("map-loaded", () => console.log("Map initialized"));
+const unsubscribe = adapter.on("flightClick", ({ flightId }) => {
+  console.log(flightId);
+});
+adapter.on("mapClick", handleMapClick);
+adapter.init({ type: "leaflet", selectorID: "map" });
+
+unsubscribe();
+adapter.off("mapClick", handleMapClick);
+adapter.destroy(); // Removes all event subscriptions, even before init.
+```
+
+`onFlightClick` and `onMapClick` have been replaced by `on("flightClick", handler)`
+and `on("mapClick", handler)`. `on` and `once` return an unsubscribe function.
+Event names and argument tuples are defined in `FlightMapEvents`; adding an event
+requires declaring its tuple and emitting it at the source, without adding
+per-event listener storage or subscription methods. Listeners run synchronously
+in registration order; duplicate `on` subscriptions of the same function are
+deduplicated. Each emission snapshots its listeners, so changes to subscriptions
+affect subsequent emissions. Listener exceptions propagate to the caller.

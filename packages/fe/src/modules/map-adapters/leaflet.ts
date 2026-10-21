@@ -1,13 +1,11 @@
+import { EventEmitter } from "./event-emitter";
 import Leaflet, { Marker, Polyline } from "leaflet";
 import type { FeatureCollection } from "geojson";
 import type {
   AdapterInitializationOptions,
-  FlightClickEvent,
-  FlightClickHandler,
+  FlightMapEvents,
   FlightMapAdapter,
 } from "./base";
-import MapCountriesJson from "../../maps/ne_50m_admin_0_countries.json";
-import MapAirportsJson from "../../maps/ne_50m_airports.json";
 import type { PlaneBasic } from "@flight-hero/contract";
 
 import PlaneDefault from "../../assets/plane-default.svg?raw";
@@ -31,30 +29,14 @@ const planeIcons: Readonly<Partial<Record<string, string>>> = {
   "Bombardier CRJ": BombardierCRJ,
 };
 
-export class LeafletAdapter implements FlightMapAdapter {
+export class LeafletAdapter
+  extends EventEmitter<FlightMapEvents>
+  implements FlightMapAdapter
+{
   private map: Leaflet.Map | null = null;
   private flightMarkers: Map<string, Marker> = new Map();
   private flightTrails: Map<string, Polyline> = new Map();
-  private flightClickHandlers = new Set<FlightClickHandler>();
-  private mapClickHandlers = new Set<() => void>();
-
-  onMapClick(handler: () => void): () => void {
-    this.mapClickHandlers.add(handler);
-
-    return () => {
-      this.mapClickHandlers.delete(handler);
-    };
-  }
-
-  onFlightClick(handler: FlightClickHandler): () => void {
-    this.flightClickHandlers.add(handler);
-
-    return () => {
-      this.flightClickHandlers.delete(handler);
-    };
-  }
-
-  init(options: AdapterInitializationOptions): void {
+  async init(options: AdapterInitializationOptions): Promise<void> {
     if (this.map != null) {
       return;
     }
@@ -64,7 +46,7 @@ export class LeafletAdapter implements FlightMapAdapter {
     this.map.on("zoomend", this.updateMarkerSizes);
     // Bind click event listener to map
     this.map.addEventListener("click", () => {
-      this.emitMapClick();
+      this.emit("mapClick");
     });
     import("leaflet/dist/leaflet.css")
       .then(() => {
@@ -74,16 +56,18 @@ export class LeafletAdapter implements FlightMapAdapter {
         console.error("Loading leaflet CSS failed!");
       });
 
-    this.loadMap();
+    await this.loadMap();
 
     const dimmerPane = this.map.createPane("basemapDimmer");
     dimmerPane.classList.add("flight-basemap-dimmer");
     dimmerPane.setAttribute("aria-hidden", "true");
     this.map.on("move zoom resize viewreset", this.updateDimmerBounds);
     this.updateDimmerBounds();
+    this.emit("mapLoaded");
   }
 
   destroy() {
+    this.clear();
     if (this.map == null) {
       return;
     }
@@ -113,9 +97,13 @@ export class LeafletAdapter implements FlightMapAdapter {
       });
       marker.addTo(this.map!);
       this.flightMarkers.set(id, marker);
+      const svg = marker.getElement()?.querySelector("svg");
+      if (svg) {
+        svg.style.transform = `rotate(${payload.heading}deg)`;
+      }
 
       marker.addEventListener("click", () => {
-        this.emitFlightClick({ flightId: id });
+        this.emit("flightClick", { flightId: id });
       });
       return;
     }
@@ -179,21 +167,13 @@ export class LeafletAdapter implements FlightMapAdapter {
     trail.setLatLngs([]);
   }
 
-  private emitMapClick(): void {
-    this.mapClickHandlers.forEach((handler) => handler());
-  }
-
-  private emitFlightClick(event: FlightClickEvent): void {
-    this.flightClickHandlers.forEach((handler) => handler(event));
-  }
-
   private assertMapInstance() {
     if (this.map == null) {
       throw new Error("Map instance should be initialized first");
     }
   }
 
-  private loadMap(): void {
+  private async loadMap(): Promise<void> {
     this.assertMapInstance();
 
     const basemapPane = this.map!.createPane("basemap");
@@ -210,8 +190,13 @@ export class LeafletAdapter implements FlightMapAdapter {
       "#fed7aa",
     ];
 
+    const imported = await import("../../maps/ne_50m_admin_0_countries.json");
+
+    if (this.map == null) {
+      return;
+    }
     // Fill color into country blocks
-    Leaflet.geoJSON(MapCountriesJson as FeatureCollection, {
+    Leaflet.geoJSON(imported.default as FeatureCollection, {
       pane: "basemap",
       style: (feature) => {
         const index = Number(feature?.properties?.MAPCOLOR7) - 1;
@@ -222,24 +207,6 @@ export class LeafletAdapter implements FlightMapAdapter {
           color: "#64748b",
           weight: 1,
         };
-      },
-    }).addTo(this.map!);
-
-    Leaflet.geoJSON(MapAirportsJson as FeatureCollection, {
-      pane: "basemap",
-      pointToLayer: (_feature, latlng) =>
-        Leaflet.circleMarker(latlng, {
-          pane: "basemap",
-          radius: 4,
-          color: "#ffffff",
-          weight: 1,
-          fillColor: "#f59e0b",
-          fillOpacity: 1,
-        }),
-
-      onEachFeature: (feature, layer) => {
-        const name = feature.properties?.name;
-        if (name) layer.bindTooltip(String(name));
       },
     }).addTo(this.map!);
   }
