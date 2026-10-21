@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
-import type { PlaneDetailed, PlaneBasic } from "@flight-hero/contract";
+import type { PlaneBasic } from "@flight-hero/contract";
 import type { FlightMapAdapter } from "../modules/map-adapters/base";
 
 type TimelineKey = "altitude" | "latitude" | "longitude" | "heading";
@@ -12,11 +12,7 @@ type FlightTimeline = Omit<PlaneBasic, TimelineKey> & {
 
 interface IFlightStore {
   selectedFlightId: string;
-  flights: Record<string, PlaneDetailed>;
   positions: Record<string, FlightTimeline>;
-
-  updateFlight(id: string, detail: PlaneDetailed): void;
-  removeFlight(id: string): void;
 
   updatePosition(id: string, payload: PlaneBasic): void;
   removePosition(id: string): void;
@@ -29,33 +25,7 @@ export const useFlightStore = create<IFlightStore>()(
   subscribeWithSelector((set) => {
     return {
       selectedFlightId: "",
-      flights: {},
       positions: {},
-
-      updateFlight(id, detail) {
-        return set((state) => {
-          const { flights = {} } = state;
-
-          return {
-            flights: {
-              ...flights,
-              [id]: detail,
-            },
-          };
-        });
-      },
-
-      removeFlight(id) {
-        return set((state) => {
-          const { flights } = state;
-
-          const { [id]: _target, ...rest } = flights;
-
-          return {
-            flights: rest,
-          };
-        });
-      },
 
       updatePosition(id, payload) {
         return set((state) => {

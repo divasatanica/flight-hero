@@ -4,6 +4,7 @@ import type { FlightMapAdapter } from "../modules/map-adapters/base";
 import { mapAdapaterFactory } from "../modules/map-adapters";
 import { FlightSocket } from "../modules/websocket/flights";
 import { CONFIGS } from "../modules/configs";
+import { PlaneDetailDrawer } from "./plane-detail-drawer";
 import {
   connectFlightIdToMap,
   connnectFlightBasicToAircraftMap,
@@ -14,6 +15,7 @@ export function MainMap() {
   const mapRef = useRef<FlightMapAdapter | null>(null);
   const flightBasicSocketRef = useRef<FlightSocket | null>(null);
   const store = useFlightStore();
+  const selectedFlightId = store.selectedFlightId;
 
   useEffect(() => {
     mapRef.current = mapAdapaterFactory();
@@ -78,6 +80,13 @@ export function MainMap() {
   return (
     <div>
       <div id="map"></div>
+      {selectedFlightId !== "" && (
+        <PlaneDetailDrawer
+          key={selectedFlightId}
+          selectedFlightId={selectedFlightId}
+          onClose={store.clearSelectedFlightId}
+        />
+      )}
     </div>
   );
 }
