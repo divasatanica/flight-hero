@@ -34,9 +34,7 @@ export function MainMap() {
 
           const { data } = message;
 
-          data.forEach((planeBasic) => {
-            store.updatePosition(planeBasic.id, planeBasic);
-          });
+          store.updatePosition(data);
         },
       },
     );
@@ -49,7 +47,6 @@ export function MainMap() {
       store.updateSelectedFlightId(flightId);
     });
     mapRef.current.on("mapLoaded", () => {
-      console.log("mapLoaded");
       flightBasicSocketRef.current!.init();
       setMapLoaded(true);
     });
@@ -60,11 +57,9 @@ export function MainMap() {
     });
 
     return () => {
-      if (mapRef.current == null) {
-        return;
-      }
-      mapRef.current.destroy();
+      mapRef.current?.destroy();
       mapRef.current = null;
+      flightBasicSocketRef.current?.disconnect();
     };
   }, []);
 
@@ -79,7 +74,6 @@ export function MainMap() {
     );
 
     return () => {
-      flightBasicSocketRef.current?.disconnect();
       unsubscribeFlightBasic();
       unsubscribeFlightId();
     };

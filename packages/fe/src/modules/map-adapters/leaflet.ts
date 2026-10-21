@@ -58,6 +58,11 @@ export class LeafletAdapter
 
     await this.loadMap();
 
+    // Discard the out-dated promise fulfillment
+    if (this.map == null) {
+      return;
+    }
+
     const dimmerPane = this.map.createPane("basemapDimmer");
     dimmerPane.classList.add("flight-basemap-dimmer");
     dimmerPane.setAttribute("aria-hidden", "true");

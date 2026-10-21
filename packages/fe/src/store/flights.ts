@@ -14,7 +14,7 @@ interface IFlightStore {
   selectedFlightId: string;
   positions: Record<string, FlightTimeline>;
 
-  updatePosition(id: string, payload: PlaneBasic): void;
+  updatePosition(payloads: PlaneBasic[]): void;
   removePosition(id: string): void;
 
   updateSelectedFlightId(id: string): void;
@@ -27,37 +27,33 @@ export const useFlightStore = create<IFlightStore>()(
       selectedFlightId: "",
       positions: {},
 
-      updatePosition(id, payload) {
+      updatePosition(payloads) {
+        if (payloads.length === 0) return;
+
         return set((state) => {
-          const { positions } = state;
+          const positions = { ...state.positions };
 
-          const existedTimeline = positions[id] || {
-            id: payload.id,
-            color: payload.color,
-            model: payload.model,
-            timeline: [],
-          };
+          for (const payload of payloads) {
+            const existing = positions[payload.id];
+            const timeline = [
+              ...(existing?.timeline ?? []),
+              {
+                altitude: payload.altitude,
+                latitude: payload.latitude,
+                longitude: payload.longitude,
+                heading: payload.heading,
+              },
+            ].slice(-300);
 
-          // Display polyline with maximum 300 history points
-          if (existedTimeline.timeline.length >= 300) {
-            existedTimeline.timeline.shift();
+            positions[payload.id] = {
+              id: payload.id,
+              color: existing?.color ?? payload.color,
+              model: existing?.model ?? payload.model,
+              timeline,
+            };
           }
 
-          existedTimeline.timeline.push({
-            altitude: payload.altitude,
-            latitude: payload.latitude,
-            longitude: payload.longitude,
-            heading: payload.heading,
-          });
-
-          return {
-            positions: {
-              ...positions,
-              [id]: {
-                ...existedTimeline,
-              },
-            },
-          };
+          return { positions };
         });
       },
 
@@ -125,7 +121,6 @@ export function connnectFlightBasicToAircraftMap(
   return store.subscribe(
     (store) => store.positions,
     (currPositions) => {
-      console.log("updatingPositions");
       Object.keys(currPositions).forEach((flightId) => {
         const { timeline, ...restBasic } = currPositions[flightId];
         const newestPosition = timeline[timeline.length - 1];
