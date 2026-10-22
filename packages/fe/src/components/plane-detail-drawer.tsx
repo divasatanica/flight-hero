@@ -41,6 +41,14 @@ export function PlaneDetailDrawer({
           setPlaneDetail(message.data);
         }
       },
+      onClose(event) {
+        const { code } = event;
+
+        if (code === 1008) {
+          alert(`Flight ${selectedFlightId} does not exist`);
+          dialogRef.current?.close();
+        }
+      },
     });
     socket.init();
     return () => socket.disconnect();

@@ -3,27 +3,37 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@flight-hero/contract": "*",
     "leaflet": "^1.9.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@flight-hero/be": "*",
+    "@flight-hero/contract": "*",
+    "@playwright/test": "^1.64.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^20.19.27",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "geojson": "^0.5.0",
+    "jsdom": "^29.1.1",
     "typescript": "^5.9.3",
-    "vite": "^8.3.5"
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   },
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "typecheck": "tsc -b --pretty false",
-    "preview": "vite preview"
+    "typecheck": "tsc -b --pretty false && tsc -p tsconfig.tests.json --pretty false",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   }
 }

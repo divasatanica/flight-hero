@@ -12,7 +12,9 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "start": "npm run start -w @flight-hero/be",
     "dev:fe": "npm run dev -w @flight-hero/fe",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "npm run test -w @flight-hero/fe",
+    "test:e2e": "npm run test:e2e -w @flight-hero/fe"
   },
   "devDependencies": {
     "concurrently": "^10.0.6",

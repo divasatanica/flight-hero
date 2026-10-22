@@ -29,3 +29,7 @@ yarn-error.log*
 
 Requirements.md
 
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
