@@ -13,8 +13,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ws": "^8.16.0",
-    "@flight-hero/contract": "*"
+    "@flight-hero/contract": "*",
+    "dotenv": "^18.0.8",
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

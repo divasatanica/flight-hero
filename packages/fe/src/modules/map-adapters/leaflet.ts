@@ -231,7 +231,7 @@ export class LeafletAdapter
 
   private getMarkerSize(): number {
     const zoom = this.map!.getZoom();
-    return Math.max(64, Math.min(96, 64 * 1.2 ** (zoom - 5)));
+    return Math.max(32, Math.min(96, 48 * 1.2 ** (zoom - 5)));
   }
 
   private updateMarkerSizes = (): void => {

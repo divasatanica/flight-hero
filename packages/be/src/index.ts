@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Simulation } from "./simulation";
 import { createServer } from "./server";
 

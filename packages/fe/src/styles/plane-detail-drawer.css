@@ -87,14 +87,38 @@
   font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 720px) {
   .plane-detail-drawer {
-    width: 90%;
+    inset: auto 0 0;
+    width: 100%;
+    height: auto;
+    max-height: 85dvh;
     padding: 20px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+    border-left: 0;
+    border-top: 1px solid #dce2e8;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 32px rgb(0 0 0 / 12%);
   }
 
   .plane-detail-drawer__grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
+  }
+}
+
+@media (max-width: 720px) and (prefers-reduced-motion: no-preference) {
+  .plane-detail-drawer[open] {
+    animation: plane-detail-slide-up 200ms ease-out;
+  }
+}
+
+@keyframes plane-detail-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
   }
 }
