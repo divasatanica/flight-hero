@@ -21,6 +21,8 @@ interface IFlightStore {
   clearSelectedFlightId(): void;
 }
 
+const MAX_SAMPLE_AMOUNT = 300;
+
 export const useFlightStore = create<IFlightStore>()(
   subscribeWithSelector((set) => {
     return {
@@ -35,6 +37,7 @@ export const useFlightStore = create<IFlightStore>()(
 
           for (const payload of payloads) {
             const existing = positions[payload.id];
+            // Keep only the latest maximum 300 (currently) samples to bound memory usage and trail rendering costs.
             const timeline = [
               ...(existing?.timeline ?? []),
               {
@@ -43,7 +46,7 @@ export const useFlightStore = create<IFlightStore>()(
                 longitude: payload.longitude,
                 heading: payload.heading,
               },
-            ].slice(-300);
+            ].slice(-MAX_SAMPLE_AMOUNT);
 
             positions[payload.id] = {
               id: payload.id,
@@ -88,6 +91,7 @@ export const useFlightStore = create<IFlightStore>()(
   }),
 );
 
+// Switch trails immediately on selection changes without waiting for the next position update.
 export function connectFlightIdToMap(
   store: typeof useFlightStore,
   mapAdapter: FlightMapAdapter,
@@ -114,6 +118,7 @@ export function connectFlightIdToMap(
   return unsubscribe;
 }
 
+// Sync aircraft markers and the selected trail on position updates; return cleanup for unmount.
 export function connnectFlightBasicToAircraftMap(
   store: typeof useFlightStore,
   mapAdapter: FlightMapAdapter,

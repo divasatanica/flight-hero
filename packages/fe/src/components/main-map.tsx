@@ -46,6 +46,7 @@ export function MainMap() {
       console.log("✈️ Selected:", flightId);
       store.updateSelectedFlightId(flightId);
     });
+    // Start the position stream after map resources load so store updates can safely render aircraft.
     mapRef.current.on("mapLoaded", () => {
       flightBasicSocketRef.current!.init();
       setMapLoaded(true);

@@ -13,6 +13,7 @@ export interface FlightSocketOptions extends Omit<
   onMessage?: (message: FlightMessage) => void;
 }
 
+/** Flight protocol layer: encode/decode JSON and delegate connection, heartbeat, and retry handling to SocketConnection. */
 export class FlightSocket {
   readonly connection: SocketConnection;
 
@@ -36,6 +37,7 @@ export class FlightSocket {
           !("type" in response)
         )
           return;
+        // Only filter message types here; payload fields are assumed to follow the shared contract.
         switch (response.type) {
           case "plane-details":
           case "planes":

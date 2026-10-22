@@ -27,6 +27,7 @@ export class EventEmitter<Events extends { [K in keyof Events]: unknown[] }> {
     event: K,
     listener: EventListener<Events[K]>,
   ): () => void {
+    // Unsubscribe first so a nested emit cannot invoke this one-time listener again.
     const unsubscribe = this.on(event, (...args) => {
       unsubscribe();
       listener(...args);
@@ -35,6 +36,7 @@ export class EventEmitter<Events extends { [K in keyof Events]: unknown[] }> {
   }
 
   emit<K extends keyof Events>(event: K, ...args: Events[K]): void {
+    // Snapshot listeners so additions or removals during emission do not change this dispatch.
     for (const listener of [...(this.listeners[event] ?? [])]) {
       listener(...args);
     }

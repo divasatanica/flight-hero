@@ -1,3 +1,4 @@
+/** All timing options are in milliseconds. */
 export interface SocketConnectionOptions {
   heartbeatInterval?: number;
   heartbeatTimeout?: number;
@@ -9,12 +10,16 @@ export interface SocketConnectionOptions {
   onError?: (event: Event) => void;
 }
 
+const MAX_RETRY_AFTER_MS = 60_000;
+
 /** Transport lifecycle only. The server must answer text "ping" with "pong". */
 export class SocketConnection {
   private currentSocket: WebSocket | null = null;
+  // Distinguish explicit shutdown from connection loss to suppress reconnects after disconnect().
   private stopped = true;
   private reconnectTimer?: ReturnType<typeof setTimeout>;
   private heartbeatTimer?: ReturnType<typeof setTimeout>;
+  // Reuse the timeout for the opening handshake and then pong responses; these phases do not overlap.
   private timeoutTimer?: ReturnType<typeof setTimeout>;
   private removeListeners?: () => void;
   private readonly options: Required<
@@ -29,6 +34,7 @@ export class SocketConnection {
     SocketConnectionOptions;
 
   readonly url: string;
+  private retryAttempts = 0;
 
   constructor(url: string, options: SocketConnectionOptions = {}) {
     this.url = url;
@@ -65,9 +71,12 @@ export class SocketConnection {
     const onOpen = (event: Event) => {
       clearTimeout(this.timeoutTimer);
       this.scheduleHeartbeat(socket);
+      // when reconnect is successful, reset the retry attempts counter
+      this.retryAttempts = 0;
       this.options.onOpen?.(event);
     };
     const onMessage = (event: MessageEvent) => {
+      // Consume heartbeat responses here so they never reach the application JSON parser.
       if (event.data === "pong") {
         clearTimeout(this.timeoutTimer);
         this.scheduleHeartbeat(socket);
@@ -107,6 +116,7 @@ export class SocketConnection {
     clearTimeout(this.reconnectTimer);
     this.reconnectTimer = undefined;
     const socket = this.currentSocket;
+    // Remove listeners before closing so an explicit shutdown cannot trigger reconnection.
     this.releaseSocket();
     socket?.close(1000, "Client disconnected");
   }
@@ -120,6 +130,7 @@ export class SocketConnection {
 
   private scheduleHeartbeat(socket: WebSocket): void {
     clearTimeout(this.heartbeatTimer);
+    // Schedule the next ping after receiving pong so only one heartbeat response is pending at a time.
     this.heartbeatTimer = setTimeout(() => {
       if (socket !== this.currentSocket || socket.readyState !== WebSocket.OPEN)
         return;
@@ -136,6 +147,7 @@ export class SocketConnection {
   }
 
   private retry(socket: WebSocket): void {
+    // Ignore stale callbacks from older sockets so they cannot release the current connection.
     if (socket !== this.currentSocket) return;
     // Do not wait for the close handshake on a dead connection.
     this.releaseSocket();
@@ -145,10 +157,18 @@ export class SocketConnection {
 
   private scheduleReconnect(): void {
     if (this.stopped || this.reconnectTimer !== undefined) return;
+    // Add 500–1000ms jitter to exponential backoff to spread reconnect attempts across clients.
+    const jitter = 500 + Math.round(Math.random() * 500);
+    const retryAfter =
+      Math.min(
+        MAX_RETRY_AFTER_MS,
+        this.options.reconnectDelay * 2 ** this.retryAttempts,
+      ) + jitter;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = undefined;
+      this.retryAttempts += 1;
       this.connect();
-    }, this.options.reconnectDelay);
+    }, retryAfter);
   }
 
   private releaseSocket(): void {

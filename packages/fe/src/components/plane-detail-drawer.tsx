@@ -29,6 +29,7 @@ export function PlaneDetailDrawer({
     if (!selectedFlightId) return;
 
     const socket = new FlightSocket(`${CONFIGS.wsBaseUrl}/planes/details`, {
+      // Subscriptions belong to each connection; resubscribe to the selected flight after every reconnect.
       onOpen() {
         socket.send({ type: "subscribe", planeId: selectedFlightId });
       },

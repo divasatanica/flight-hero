@@ -34,9 +34,13 @@ export class LeafletAdapter
   implements FlightMapAdapter
 {
   private map: Leaflet.Map | null = null;
+  // Reuse layers by flight ID so position updates move existing markers instead of rebuilding DOM.
   private flightMarkers: Map<string, Marker> = new Map();
   private flightTrails: Map<string, Polyline> = new Map();
   async init(options: AdapterInitializationOptions): Promise<void> {
+    if (options.type !== "leaflet") {
+      throw new Error("Unmatched adapater type");
+    }
     if (this.map != null) {
       return;
     }
@@ -58,7 +62,7 @@ export class LeafletAdapter
 
     await this.loadMap();
 
-    // Discard the out-dated promise fulfillment
+    // loadMap may return after destruction; skip the remaining initialization.
     if (this.map == null) {
       return;
     }
@@ -113,6 +117,7 @@ export class LeafletAdapter
       return;
     }
 
+    // Model and color are fixed at creation; position updates preserve the icon and change only location and heading.
     marker.setLatLng([payload.latitude, payload.longitude]);
 
     const svg = marker.getElement()?.querySelector("svg");
@@ -149,7 +154,7 @@ export class LeafletAdapter
     trail.setLatLngs(points);
   }
 
-  // Currently support displaying of one track
+  // Selected flights share the DEFAULT layer; replacing its points prevents old trails from accumulating.
   showTrack(points: Array<[number, number]>): void {
     this.addTrack("DEFAULT", points);
   }
@@ -169,6 +174,7 @@ export class LeafletAdapter
 
     const trail = this.flightTrails.get(key)!;
 
+    // Clear points but retain the layer for reuse when the same key is shown again.
     trail.setLatLngs([]);
   }
 
@@ -195,8 +201,10 @@ export class LeafletAdapter
       "#fed7aa",
     ];
 
+    // Load country boundaries on demand; geoJSON handles coordinate order without manual conversion.
     const imported = await import("../../maps/ne_50m_admin_0_countries.json");
 
+    // The map may have been destroyed while importing; skip adding the basemap.
     if (this.map == null) {
       return;
     }
@@ -223,6 +231,7 @@ export class LeafletAdapter
     if (!pane) return;
 
     const size = this.map.getSize();
+    // Panes use layer coordinates; reposition the dimmer after map movement to keep it covering the viewport.
     const topLeft = this.map.containerPointToLayerPoint([0, 0]);
     Leaflet.DomUtil.setPosition(pane, topLeft);
     pane.style.width = `${size.x}px`;
@@ -231,6 +240,7 @@ export class LeafletAdapter
 
   private getMarkerSize(): number {
     const zoom = this.map!.getZoom();
+    // Scale with zoom within fixed bounds to balance clickable targets and map readability.
     return Math.max(32, Math.min(96, 48 * 1.2 ** (zoom - 5)));
   }
 
@@ -243,6 +253,7 @@ export class LeafletAdapter
 
       element.style.width = `${size}px`;
       element.style.height = `${size}px`;
+      // Update anchor offsets with the size so the aircraft center stays on its geographic position.
       element.style.marginLeft = `${-size / 2}px`;
       element.style.marginTop = `${-size / 2}px`;
     });
@@ -260,7 +271,7 @@ export class LeafletAdapter
     svg.style.transformOrigin = "50% 50%";
     svg.style.transform = `rotate(${heading}deg)`;
 
-    // Use unique ID to avoid multiple plane icons shares duplicate ids
+    // Inline SVG IDs share the document namespace; rewrite definitions and references to prevent mask collisions.
     const prefix = `plane-${crypto.randomUUID()}`;
     const mask = svg.querySelector("mask")!;
     const maskId = `${prefix}-mask`;
