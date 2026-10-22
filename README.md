@@ -46,6 +46,8 @@ npm run build     # Build the frontend and backend
 npm start         # Start the compiled backend
 ```
 
+The backend build runs `packages/be/build.sh`: TypeScript compiles to `packages/be/dist/`, then the script copies its contents to the repository root’s `output/be/`, replacing the previous backend copy. `npm start` runs `packages/be/dist/index.js`. Frontend static files are built into `output/fe/`. Each build updates only its own output directory, preserving the other package’s artifacts.
+
 To preview the frontend production build:
 
 ```sh
