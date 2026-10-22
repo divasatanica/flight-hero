@@ -117,7 +117,6 @@ export function connectFlightIdToMap(
           item.latitude,
           item.longitude,
         ]) as Array<[number, number]>;
-        console.log("flight", currSelectedFlightId, latLng);
         mapAdapter.showTrack(latLng);
       }
     },

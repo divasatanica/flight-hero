@@ -1,5 +1,9 @@
+export type ConnectionStatus =
+  "connecting" | "live" | "reconnecting" | "disconnected";
+
 /** All timing options are in milliseconds. */
 export interface SocketConnectionOptions {
+  onStatusChange?: (status: ConnectionStatus) => void;
   heartbeatInterval?: number;
   heartbeatTimeout?: number;
   reconnectDelay?: number;
@@ -67,12 +71,14 @@ export class SocketConnection {
     // Invalid URLs throw synchronously so callers can fix configuration errors.
     const socket = new WebSocket(this.url);
     this.currentSocket = socket;
+    if (this.retryAttempts === 0) this.options.onStatusChange?.("connecting");
 
     const onOpen = (event: Event) => {
       clearTimeout(this.timeoutTimer);
       this.scheduleHeartbeat(socket);
       // when reconnect is successful, reset the retry attempts counter
       this.retryAttempts = 0;
+      this.options.onStatusChange?.("live");
       this.options.onOpen?.(event);
     };
     const onMessage = (event: MessageEvent) => {
@@ -89,6 +95,7 @@ export class SocketConnection {
       if (event.code === 1008) this.stopped = true;
       this.releaseSocket();
       this.scheduleReconnect();
+      if (this.stopped) this.options.onStatusChange?.("disconnected");
       this.options.onClose?.(event);
     };
     const onError = (event: Event) => {
@@ -157,6 +164,7 @@ export class SocketConnection {
 
   private scheduleReconnect(): void {
     if (this.stopped || this.reconnectTimer !== undefined) return;
+    this.options.onStatusChange?.("reconnecting");
     // Add 500–1000ms jitter to exponential backoff to spread reconnect attempts across clients.
     const jitter = 500 + Math.round(Math.random() * 500);
     const retryAfter =

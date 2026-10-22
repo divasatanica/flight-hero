@@ -1,7 +1,9 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { PlaneDetailed } from "@flight-hero/contract";
 import "../styles/plane-detail-drawer.css";
+import { detailFields } from "../modules/tools/detail-fields";
 import { CONFIGS } from "../modules/configs";
+import type { ConnectionStatus } from "../modules/websocket/connection";
 import { FlightSocket } from "../modules/websocket/flights";
 
 type PlaneDetailDrawerProps = {
@@ -18,18 +20,16 @@ export function PlaneDetailDrawer({
     {} as PlaneDetailed,
   );
   const titleId = useId();
-  const estimatedArrival = useMemo(() => {
-    if (typeof planeDetail.estimatedArrival !== "number") {
-      return "-";
-    }
-    return new Date(planeDetail.estimatedArrival).toISOString();
-  }, [planeDetail.estimatedArrival]);
+  const [error, setError] = useState("");
+  const [connectionStatus, setConnectionStatus] =
+    useState<ConnectionStatus>("connecting");
 
   useEffect(() => {
     if (!selectedFlightId) return;
 
     const socket = new FlightSocket(`${CONFIGS.wsBaseUrl}/planes/details`, {
       // Subscriptions belong to each connection; resubscribe to the selected flight after every reconnect.
+      onStatusChange: setConnectionStatus,
       onOpen() {
         socket.send({ type: "subscribe", planeId: selectedFlightId });
       },
@@ -45,8 +45,7 @@ export function PlaneDetailDrawer({
         const { code } = event;
 
         if (code === 1008) {
-          alert(`Flight ${selectedFlightId} does not exist`);
-          dialogRef.current?.close();
+          setError(`Flight ${selectedFlightId} is no longer available.`);
         }
       },
     });
@@ -60,14 +59,7 @@ export function PlaneDetailDrawer({
     return () => dialog.close();
   }, []);
 
-  const fields = Object.entries(planeDetail).flatMap(([key, value]) =>
-    typeof value === "object" && value !== null
-      ? Object.entries(value).map(([childKey, childValue]) => [
-          `${key}.${childKey}`,
-          childValue,
-        ])
-      : [[key, value]],
-  );
+  const fields = detailFields(planeDetail);
 
   return (
     <dialog
@@ -110,18 +102,27 @@ export function PlaneDetailDrawer({
           ×
         </button>
       </header>
-      <dl className="plane-detail-drawer__grid">
-        {fields.map(([key, value]) => (
-          <div key={key}>
-            <dt>{key}</dt>
-            {key === "estimatedArrival" ? (
-              <dd>{typeof value === "number" ? estimatedArrival : "-"}</dd>
-            ) : (
-              <dd>{String(value ?? "—")}</dd>
-            )}
-          </div>
-        ))}
-      </dl>
+      {error ? (
+        <p role="alert">{error}</p>
+      ) : (
+        <>
+          <p role="status">
+            {connectionStatus === "reconnecting"
+              ? "Reconnecting… Details may be outdated."
+              : !planeDetail.id
+                ? "Loading aircraft details…"
+                : "Live aircraft details"}
+          </p>
+          <dl className="plane-detail-drawer__grid">
+            {fields.map(([key, value]) => (
+              <div key={key}>
+                <dt>{key}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </>
+      )}
     </dialog>
   );
 }

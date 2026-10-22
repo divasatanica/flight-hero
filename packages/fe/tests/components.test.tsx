@@ -64,8 +64,8 @@ it("subscribes on every open including reconnect and ignores another aircraft de
   act(() => socket.message(detail("A")));
 
   expect(screen.getByText("FH100", { selector: "p" })).toBeInTheDocument();
-  expect(screen.getByText("1970-01-01T00:00:00.000Z")).toBeInTheDocument();
-  expect(screen.getByText("Dubai")).toBeInTheDocument();
+  expect(screen.getByText("01 Jan 1970, 00:00")).toBeInTheDocument();
+  expect(screen.getByText("DXB · Dubai")).toBeInTheDocument();
 
   // Exercise an actual reconnect rather than emitting open twice on one socket.
   act(() => socket.serverClose(1006));
@@ -187,4 +187,50 @@ it("connects real store and protocol to map updates and clears selection on map 
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(details.close).toHaveBeenCalled();
   expect(map.clearTrack).toHaveBeenCalled();
+});
+
+it("shows connection loss, restores live status and dismisses the recovery toast", () => {
+  vi.useFakeTimers();
+  vi.spyOn(Math, "random").mockReturnValue(0);
+  render(<MainMap />);
+  act(() => map.emit("mapLoaded"));
+  expect(screen.getByText("Connecting…")).toBeInTheDocument();
+  act(() => latestSocket().open());
+  expect(screen.getByText("Live")).toBeInTheDocument();
+  expect(screen.queryByText("Connection restored")).not.toBeInTheDocument();
+  act(() => latestSocket().serverClose(1006));
+  expect(
+    screen.getByText(/Reconnecting… Positions may be outdated/),
+  ).toBeInTheDocument();
+  act(() => vi.advanceTimersByTime(2500));
+  act(() => latestSocket().open());
+  expect(screen.getByText("Connection restored")).toBeInTheDocument();
+  act(() => vi.advanceTimersByTime(4000));
+  expect(screen.queryByText("Connection restored")).not.toBeInTheDocument();
+});
+
+it("shows retry status after the opening connection times out", () => {
+  vi.useFakeTimers();
+  render(<MainMap />);
+  act(() => map.emit("mapLoaded"));
+  act(() => vi.advanceTimersByTime(10000));
+  expect(
+    screen.getByText(/Reconnecting… Positions may be outdated/),
+  ).toBeInTheDocument();
+});
+
+it("keeps a missing-flight error inside the drawer until the user closes it", async () => {
+  const onClose = vi.fn();
+  render(<PlaneDetailDrawer selectedFlightId="missing" onClose={onClose} />);
+  expect(screen.getByText("Loading aircraft details…")).toBeInTheDocument();
+  act(() => latestSocket().serverClose(1008));
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Flight missing is no longer available.",
+  );
+  expect(screen.getByRole("dialog")).toBeInTheDocument();
+  expect(onClose).not.toHaveBeenCalled();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Close aircraft details" }),
+  );
+  expect(onClose).toHaveBeenCalledTimes(1);
 });

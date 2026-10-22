@@ -9,6 +9,9 @@ export default tseslint.config(
   {
     ignores: [
       "**/dist/**",
+      "outputs/**",
+      "**/test-results/**",
+      "**/playwright-report/**",
       "**/node_modules/**",
       "**/coverage/**",
       "**/.husky/_/**",
@@ -17,11 +20,11 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ["apps/api/**/*.ts", "packages/**/*.ts", "*.mjs"],
+    files: ["packages/**/*.ts", "*.mjs"],
     languageOptions: { globals: globals.node },
   },
   {
-    files: ["apps/web/**/*.{ts,tsx}"],
+    files: ["packages/fe/src/**/*.{ts,tsx}"],
     languageOptions: { globals: globals.browser },
     plugins: {
       "react-hooks": reactHooks,

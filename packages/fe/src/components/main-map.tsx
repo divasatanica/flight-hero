@@ -2,6 +2,8 @@ import { lazy, useEffect, useRef, useState } from "react";
 import "../styles/main-map.css";
 import type { FlightMapAdapter } from "../modules/map-adapters/base";
 import { mapAdapaterFactory } from "../modules/map-adapters";
+import { ConnectionNotice } from "./connection-notice";
+import type { ConnectionStatus } from "../modules/websocket/connection";
 import { FlightSocket } from "../modules/websocket/flights";
 import { CONFIGS } from "../modules/configs";
 import {
@@ -29,11 +31,14 @@ export function MainMap() {
     (state) => state.clearSelectedFlightId,
   );
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [connectionStatus, setConnectionStatus] =
+    useState<ConnectionStatus>("connecting");
 
   useEffect(() => {
     flightBasicSocketRef.current = new FlightSocket(
       `${CONFIGS.wsBaseUrl}/planes/basic`,
       {
+        onStatusChange: setConnectionStatus,
         onMessage(message) {
           const { type } = message;
 
@@ -77,6 +82,7 @@ export function MainMap() {
   }, [flightStore]);
 
   useEffect(() => {
+    // Connect store to map adapter to avoid depending on it directly
     const unsubscribeFlightBasic = connnectFlightBasicToAircraftMap(
       flightStore,
       mapRef.current!,
@@ -97,6 +103,7 @@ export function MainMap() {
       <div id="map">
         {mapLoaded ? null : <span>Loading map resources...</span>}
       </div>
+      {mapLoaded && <ConnectionNotice status={connectionStatus} />}
       {selectedFlightId !== "" && (
         <LazyPlaneDetailDrawer
           key={selectedFlightId}

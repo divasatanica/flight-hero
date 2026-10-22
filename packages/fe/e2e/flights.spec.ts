@@ -28,7 +28,7 @@ test("opens live details and a trail, then releases both on close", async ({
   await expect(
     dialog
       .locator("dt")
-      .filter({ hasText: /^id$/ })
+      .filter({ hasText: /^Aircraft ID$/ })
       .locator("..")
       .locator("dd"),
   ).toHaveText(id);
@@ -56,7 +56,9 @@ test("switches aircraft without keeping the previous details", async ({
   await markers.nth(0).click({ force: true });
   const dialog = page.getByRole("dialog");
 
-  await expect(dialog.locator("dt").filter({ hasText: /^id$/ })).toBeVisible();
+  await expect(
+    dialog.locator("dt").filter({ hasText: /^Aircraft ID$/ }),
+  ).toBeVisible();
   await page.keyboard.press("Escape");
 
   await expect(dialog).toHaveCount(0);
@@ -67,7 +69,7 @@ test("switches aircraft without keeping the previous details", async ({
   await expect(
     dialog
       .locator("dt")
-      .filter({ hasText: /^id$/ })
+      .filter({ hasText: /^Aircraft ID$/ })
       .locator("..")
       .locator("dd"),
   ).toHaveText(id);
@@ -85,4 +87,30 @@ test("continues moving existing markers as real server positions arrive", async 
   await expect.poll(() => marker.getAttribute("style")).not.toBe(original);
 
   await expect(page.locator(".plane-marker")).toHaveCount(3);
+});
+
+test("shows native recovery toast after a basic stream disconnect", async ({
+  page,
+}) => {
+  let disconnect: (() => void) | undefined;
+  await page.routeWebSocket("**/ws/planes/basic", (socket) => {
+    socket.connectToServer();
+    disconnect ??= () =>
+      socket.close({ code: 1011, reason: "Test disconnect" });
+  });
+  await page.reload();
+  await expect(page.getByText("Live", { exact: true })).toBeVisible();
+  expect(disconnect).toBeDefined();
+  disconnect!();
+  await expect(
+    page.getByText("Reconnecting… Positions may be outdated."),
+  ).toBeVisible();
+  const toast = page.locator(".connection-toast");
+  await expect(toast).toBeVisible();
+  await expect(toast).toHaveJSProperty("popover", "manual");
+  await expect(page.locator(".connection-toast:popover-open")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Dismiss connection notification" })
+    .click();
+  await expect(toast).toHaveCount(0);
 });

@@ -6,6 +6,8 @@ The project uses npm workspaces to manage the React frontend, Node.js backend, a
 
 ## Quick Start
 
+Use Node.js **18.20.x** or a newer version matching `package.json` (Node.js 22/24 is recommended for ongoing development). Node 18 compatibility is retained for the interview environment; Node 18 itself is end-of-life. With nvm, run `nvm install` and `nvm use` to select the tested version in `.nvmrc`.
+
 Run from the repository root:
 
 ```sh
@@ -46,7 +48,7 @@ npm run build     # Build the frontend and backend
 npm start         # Start the compiled backend
 ```
 
-The backend build runs `packages/be/build.sh`: TypeScript compiles to `packages/be/dist/`, then the script copies its contents to the repository root’s `output/be/`, replacing the previous backend copy. `npm start` runs `packages/be/dist/index.js`. Frontend static files are built into `output/fe/`. Each build updates only its own output directory, preserving the other package’s artifacts.
+The backend build runs `packages/be/build.sh`: TypeScript compiles to `packages/be/dist/`, then the script copies its contents to the repository root’s `outputs/be/`, replacing the previous backend copy. `npm start` runs `packages/be/dist/index.js`. Frontend static files are built into `outputs/fe/`. Each build updates only its own output directory, preserving the other package’s artifacts.
 
 To preview the frontend production build:
 
@@ -234,7 +236,7 @@ The frontend uses **Vitest** for unit/integration tests, **React Testing Library
 ```sh
 npm test                 # Transport, protocol, store, component and real-server integration tests
 npm run test:watch -w @flight-hero/fe
-npx playwright install chromium  # One-time browser installation
+npm exec -w @flight-hero/fe -- playwright install chromium  # One-time browser installation
 npm run test:e2e          # Starts isolated frontend + actual backend automatically
 npm run typecheck        # Includes TypeScript checks for test code and test configurations
 ```
@@ -250,3 +252,9 @@ End-to-end tests use the real Leaflet map, React app, native browser WebSocket a
 Frontend integration tests import `createServer` from `@flight-hero/be/server` and `Simulation` from `@flight-hero/be/simulation`. The private backend package explicitly exports these two TypeScript source modules, so Vitest can run them without a backend build. These entry points require TypeScript-aware tooling; they do not import the application startup module. The backend still starts with its existing `dev` and `start` commands.
 
 The frontend declares the backend as a development dependency because only tests use it. Both frontend and backend declare `@flight-hero/contract` as a development dependency because all current imports are type-only and disappear from emitted JavaScript. If the contract later provides runtime values, consumers using those values should move it to runtime dependencies.
+
+### Node 18 Toolchain Compatibility
+
+The build and test tools are pinned to Node 18-compatible releases: Vite 6, React plugin 4, Vitest 3, jsdom 26, Playwright 1.56 and jest-dom 6. React application code and shared contracts are unchanged by this compatibility choice.
+
+Some older development dependencies have known security advisories without Node 18-compatible fixes. Run `npm audit` to inspect the current lockfile. Use the test runner only with trusted repository tests and configuration, and do not expose Vitest's API/UI server to a network. These development tools are not included in the browser production bundle. This compatibility setup is intended for the local interview exercise; upgrade the toolchain and Node.js before adopting it for ongoing production development.
