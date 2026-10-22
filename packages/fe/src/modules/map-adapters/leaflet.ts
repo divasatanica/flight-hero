@@ -52,10 +52,10 @@ export class LeafletAdapter
     this.map.addEventListener("click", () => {
       this.emit("mapClick");
     });
-    // 修改默认的 Leaflet 署名
+    // Customize the default Leaflet attribution prefix.
     this.map.attributionControl.setPrefix("Flight Hero");
 
-    // 添加地图数据来源
+    // Credit the map data source.
     this.map.attributionControl.addAttribution(
       'Map data: <a href="https://www.naturalearthdata.com/">Natural Earth</a>',
     );
