@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { createStore } from "zustand/vanilla";
 import { subscribeWithSelector } from "zustand/middleware";
 import type { PlaneBasic } from "@flight-hero/contract";
 import type { FlightMapAdapter } from "../modules/map-adapters/base";
@@ -23,77 +23,85 @@ interface IFlightStore {
 
 const MAX_SAMPLE_AMOUNT = 300;
 
-export const useFlightStore = create<IFlightStore>()(
-  subscribeWithSelector((set) => {
-    return {
-      selectedFlightId: "",
-      positions: {},
+/**
+ * It's a factory function for flight store, and it creates a new instance of flight store
+ * each time when a new map component is mounted.
+ * It isolates the data between each map component instance.
+ */
+export const createFlightStore = () =>
+  createStore<IFlightStore>()(
+    subscribeWithSelector((set) => {
+      return {
+        selectedFlightId: "",
+        positions: {},
 
-      updatePosition(payloads) {
-        if (payloads.length === 0) return;
+        updatePosition(payloads) {
+          if (payloads.length === 0) return;
 
-        return set((state) => {
-          const positions = { ...state.positions };
+          return set((state) => {
+            const positions = { ...state.positions };
 
-          for (const payload of payloads) {
-            const existing = positions[payload.id];
-            // Keep only the latest maximum 300 (currently) samples to bound memory usage and trail rendering costs.
-            const timeline = [
-              ...(existing?.timeline ?? []),
-              {
-                altitude: payload.altitude,
-                latitude: payload.latitude,
-                longitude: payload.longitude,
-                heading: payload.heading,
-              },
-            ].slice(-MAX_SAMPLE_AMOUNT);
+            for (const payload of payloads) {
+              const existing = positions[payload.id];
+              // Keep only the latest maximum 300 (currently) samples to bound memory usage and trail rendering costs.
+              const timeline = [
+                ...(existing?.timeline ?? []),
+                {
+                  altitude: payload.altitude,
+                  latitude: payload.latitude,
+                  longitude: payload.longitude,
+                  heading: payload.heading,
+                },
+              ].slice(-MAX_SAMPLE_AMOUNT);
 
-            positions[payload.id] = {
-              id: payload.id,
-              color: existing?.color ?? payload.color,
-              model: existing?.model ?? payload.model,
-              timeline,
+              positions[payload.id] = {
+                id: payload.id,
+                color: existing?.color ?? payload.color,
+                model: existing?.model ?? payload.model,
+                timeline,
+              };
+            }
+
+            return { positions };
+          });
+        },
+
+        removePosition(id) {
+          return set((state) => {
+            const { positions } = state;
+
+            const { [id]: _position, ...restPosition } = positions;
+
+            return {
+              positions: restPosition,
             };
-          }
+          });
+        },
 
-          return { positions };
-        });
-      },
+        updateSelectedFlightId(id) {
+          return set(() => {
+            return {
+              selectedFlightId: id,
+            };
+          });
+        },
 
-      removePosition(id) {
-        return set((state) => {
-          const { positions } = state;
+        clearSelectedFlightId() {
+          return set(() => {
+            return {
+              selectedFlightId: "",
+            };
+          });
+        },
+      };
+    }),
+  );
 
-          const { [id]: _position, ...restPosition } = positions;
-
-          return {
-            positions: restPosition,
-          };
-        });
-      },
-
-      updateSelectedFlightId(id) {
-        return set(() => {
-          return {
-            selectedFlightId: id,
-          };
-        });
-      },
-
-      clearSelectedFlightId() {
-        return set(() => {
-          return {
-            selectedFlightId: "",
-          };
-        });
-      },
-    };
-  }),
-);
+export type FlightStore = ReturnType<typeof createFlightStore>;
 
 // Switch trails immediately on selection changes without waiting for the next position update.
 export function connectFlightIdToMap(
-  store: typeof useFlightStore,
+  store: FlightStore,
   mapAdapter: FlightMapAdapter,
 ) {
   const unsubscribe = store.subscribe(
@@ -120,7 +128,7 @@ export function connectFlightIdToMap(
 
 // Sync aircraft markers and the selected trail on position updates; return cleanup for unmount.
 export function connnectFlightBasicToAircraftMap(
-  store: typeof useFlightStore,
+  store: FlightStore,
   mapAdapter: FlightMapAdapter,
 ) {
   return store.subscribe(

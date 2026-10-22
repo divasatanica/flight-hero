@@ -7,8 +7,9 @@ import { CONFIGS } from "../modules/configs";
 import {
   connectFlightIdToMap,
   connnectFlightBasicToAircraftMap,
-  useFlightStore,
+  createFlightStore,
 } from "../store/flights";
+import { useStore } from "zustand";
 
 const LazyPlaneDetailDrawer = lazy(async () => ({
   default: (await import("./plane-detail-drawer")).PlaneDetailDrawer,
@@ -17,8 +18,16 @@ const LazyPlaneDetailDrawer = lazy(async () => ({
 export function MainMap() {
   const mapRef = useRef<FlightMapAdapter | null>(null);
   const flightBasicSocketRef = useRef<FlightSocket | null>(null);
-  const store = useFlightStore();
-  const selectedFlightId = store.selectedFlightId;
+  const [flightStore] = useState(() => createFlightStore());
+
+  const selectedFlightId = useStore(
+    flightStore,
+    (state) => state.selectedFlightId,
+  );
+  const clearSelectedFlightId = useStore(
+    flightStore,
+    (state) => state.clearSelectedFlightId,
+  );
   const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
@@ -34,15 +43,18 @@ export function MainMap() {
 
           const { data } = message;
 
+          const store = flightStore.getState();
           store.updatePosition(data);
         },
       },
     );
     mapRef.current = mapAdapaterFactory();
     mapRef.current.on("mapClick", () => {
+      const store = flightStore.getState();
       store.clearSelectedFlightId();
     });
     mapRef.current.on("flightClick", ({ flightId }) => {
+      const store = flightStore.getState();
       console.log("✈️ Selected:", flightId);
       store.updateSelectedFlightId(flightId);
     });
@@ -62,15 +74,15 @@ export function MainMap() {
       mapRef.current = null;
       flightBasicSocketRef.current?.disconnect();
     };
-  }, []);
+  }, [flightStore]);
 
   useEffect(() => {
     const unsubscribeFlightBasic = connnectFlightBasicToAircraftMap(
-      useFlightStore,
+      flightStore,
       mapRef.current!,
     );
     const unsubscribeFlightId = connectFlightIdToMap(
-      useFlightStore,
+      flightStore,
       mapRef.current!,
     );
 
@@ -78,7 +90,7 @@ export function MainMap() {
       unsubscribeFlightBasic();
       unsubscribeFlightId();
     };
-  }, []);
+  }, [flightStore]);
 
   return (
     <div>
@@ -89,7 +101,7 @@ export function MainMap() {
         <LazyPlaneDetailDrawer
           key={selectedFlightId}
           selectedFlightId={selectedFlightId}
-          onClose={store.clearSelectedFlightId}
+          onClose={clearSelectedFlightId}
         />
       )}
     </div>
