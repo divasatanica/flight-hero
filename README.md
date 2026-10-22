@@ -8,6 +8,8 @@ The project uses npm workspaces to manage the React frontend, Node.js backend, a
 
 Use Node.js **18.20.x** or a newer version matching `package.json` (Node.js 22/24 is recommended for ongoing development). Node 18 compatibility is retained for the interview environment; Node 18 itself is end-of-life. With nvm, run `nvm install` and `nvm use` to select the tested version in `.nvmrc`.
 
+> **Installation warnings:** To support the Node.js 18 environment specified in the interview task, the toolchain uses older compatible dependency versions. As a result, `npm install` and `npm ci` may report vulnerability warnings for development dependencies. These are known security advisories, not installation failures. See [Node 18 Toolchain Compatibility](#node-18-toolchain-compatibility) for details and limitations.
+
 Run from the repository root:
 
 ```sh
@@ -255,6 +257,6 @@ The frontend declares the backend as a development dependency because only tests
 
 ### Node 18 Toolchain Compatibility
 
-The build and test tools are pinned to Node 18-compatible releases: Vite 6, React plugin 4, Vitest 3, jsdom 26, Playwright 1.56 and jest-dom 6. React application code and shared contracts are unchanged by this compatibility choice.
+To retain compatibility with the Node.js 18 environment specified in the interview task, the build and test tools are pinned to Node 18-compatible releases: Vite 6, React plugin 4, Vitest 3, jsdom 26, Playwright 1.56 and jest-dom 6. React application code and shared contracts are unchanged by this compatibility choice.
 
 Some older development dependencies have known security advisories without Node 18-compatible fixes. Run `npm audit` to inspect the current lockfile. Use the test runner only with trusted repository tests and configuration, and do not expose Vitest's API/UI server to a network. These development tools are not included in the browser production bundle. This compatibility setup is intended for the local interview exercise; upgrade the toolchain and Node.js before adopting it for ongoing production development.
